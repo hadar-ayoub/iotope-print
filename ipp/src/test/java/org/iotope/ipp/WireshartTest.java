@@ -26,7 +26,7 @@ public class WireshartTest {
 
     @Test
     public void ippHex01() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex01.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex01.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
@@ -34,28 +34,28 @@ public class WireshartTest {
 
     @Test
     public void ippHex02() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex02.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex02.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(223, list.get(1));
     }
 
     @Test
     public void ippHex03() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex03.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex03.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
 
     @Test
     public void ippHex04() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex04.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex04.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
 
     @Test
     public void ippHex05() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex05.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex05.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
@@ -63,7 +63,7 @@ public class WireshartTest {
 
     @Test
     public void constructHex06() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex06b.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex06b.txt"));
         assertParseAndWrite(198, list.get(0));
 
 //        System.out.println("hex06");
@@ -87,14 +87,14 @@ public class WireshartTest {
 
     @Test
     public void ippHex07() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex07.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex07.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
 
     @Test
     public void ippHex09() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex09.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex09.txt"));
         assertParseAndWrite(187, list.get(0));
         assertParseAndWrite(224, list.get(1));
     }
