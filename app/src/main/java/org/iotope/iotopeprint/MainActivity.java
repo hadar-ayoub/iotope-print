@@ -40,7 +40,7 @@ import okio.Sink;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String url = "http://172.19.0.218:631/ipp/print";
+    private static final String url = "http://192.168.1.1:631/ipp/print";
 
     public static final MediaType IPP
             = MediaType.parse("application/ipp");
@@ -69,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
                         return null;
                     }
                 }.execute();
-
-
             }
         });
     }
@@ -96,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     public void createDoc(Lwxl lwxl) throws IOException {
 
@@ -152,14 +149,12 @@ public class MainActivity extends AppCompatActivity {
         for (int lx = 20; lx <= 2000; lx += 40) {
             canvas.drawLine(lx, 50, lx, 100, black);
         }
-
         for (int lx = 0; lx <= 2000; lx += 100) {
             canvas.drawLine(lx, 100, lx, 500, black);
         }
         for (int ly = 0; ly <= 500; ly += 100) {
             canvas.drawLine(0, ly, 2000, ly, black);
         }
-
         canvas.drawLine(0, 0, 255, 255, black);
 
         text.setTextSize(42);
@@ -226,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addKeyword("requested-attributes", "compression-supported")
                         .addKeyword("copies-supported")
                         .addKeyword("cups-version")
@@ -256,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "username")
                         .addNameWithoutLanguage("job-name", "Blank Landscape Card")
                         .add49("document-format", "application/octet-stream")
@@ -267,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "username")
                         .addKeyword("requested-attributes", "compression-supported")
                         .addKeyword("copies-supported")
@@ -297,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "username")
                         .addNameWithoutLanguage("job-name", "Blank Landscape Card")
                         .build()).build();
@@ -307,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "username")
                         .addKeyword("requested-attributes", "job-id")
                         .addKeyword("job-impressions-completed")
@@ -325,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-000000.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
                         .addInt("job-id", 4)
                         .addNameWithoutLanguage("requesting-user-name", "username")
                         .addBoolean("last-document", true)
@@ -337,7 +332,6 @@ public class MainActivity extends AppCompatActivity {
         IppWriter writer = new IppWriter();
         writer.write(sink, root);
         byte[] b1 = stream.toByteArray();
-
 
         Buffer buffer2 = new Buffer();
         Lwxl lwxl = new Lwxl(buffer2);
@@ -392,6 +386,4 @@ public class MainActivity extends AppCompatActivity {
         IppParser parser = new IppParser();
         return parser.read(response.body().source());
     }
-
-
 }
