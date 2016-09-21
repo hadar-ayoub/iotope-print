@@ -33,7 +33,7 @@ public class HttpTest {
 
     @Test
     public void bar() throws IOException {
-        List<Buffer> buffers = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex06.txt"));
+        List<Buffer> buffers = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex06.txt"));
         Buffer buffer1 = buffers.get(0);
         Buffer buffer2 = buffers.get(2);
 

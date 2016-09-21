@@ -26,7 +26,7 @@ public class IppWriterTest {
     public void constructHex01() throws IOException {
         // (Get-Printer-Attributes,1 [G operation-attributes-tag[(A(47) {attributes-charset=utf-8}),(A(48) {attributes-natural-language=en-us}),(A(45) {printer-uri=ipp://ICON-1488a2.local.:631/ipp/print}),(A(44) {requested-attributes=compression-supported}),(A(44) {=copies-supported}),(A(44) {=cups-version}),(A(44) {=document-format-supported}),(A(44) {=marker-colors}),(A(44) {=marker-high-levels}),(A(44) {=marker-levels}),(A(44) {=marker-low-levels}),(A(44) {=marker-message}),(A(44) {=marker-names}),(A(44) {=marker-types}),(A(44) {=media-col-supported}),(A(44) {=multiple-document-handling-supported}),(A(44) {=operations-supported}),(A(44) {=print-color-mode-supported}),(A(44) {=printer-alert}),(A(44) {=printer-alert-description}),(A(44) {=printer-is-accepting-jobs}),(A(44) {=printer-state}),(A(44) {=printer-state-message}),(A(44) {=printer-state-reasons}),]])
 
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex01.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex01.txt"));
 
         IppRoot root = IppRoot.builder().getPrinterAttributes().request(1).add(
                 IppAttributeGroup.builder().tag(1)
@@ -61,7 +61,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex02() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex02.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex02.txt"));
 
         IppRoot root = IppRoot.builder().validateJob().request(2).add(
                 IppAttributeGroup.builder().tag(1)
@@ -79,7 +79,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex03() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex03.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex03.txt"));
 
         IppRoot root = IppRoot.builder().getPrinterAttributes().request(3).add(
                 IppAttributeGroup.builder().tag(1)
@@ -116,7 +116,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex04() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex04.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex04.txt"));
 
         IppRoot root = IppRoot.builder().createJob().request(4).add(
                 IppAttributeGroup.builder().tag(1)
@@ -133,7 +133,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex05() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex05.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex05.txt"));
 
         IppRoot root = IppRoot.builder().getJobs().request(5).add(
                 IppAttributeGroup.builder().tag(1)
@@ -157,7 +157,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex07() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex07.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex07.txt"));
 
         IppRoot root = IppRoot.builder().getPrinterAttributes().request(7).add(
                 IppAttributeGroup.builder().tag(1)
@@ -193,7 +193,7 @@ public class IppWriterTest {
 
     @Test
     public void readHex09() throws IOException {
-        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("hex09.txt"));
+        List<Buffer> list = BinUtil.wiresharkToBuffers(getClass().getResourceAsStream("resources/hex09.txt"));
 
         IppRoot root = IppRoot.builder().getJobAttributes().request(8).add(
                 IppAttributeGroup.builder().tag(1)
