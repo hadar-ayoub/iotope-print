@@ -56,7 +56,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100:631/ipp/print")
                         .addKeyword("requested-attributes", "compression-supported")
                         .addKeyword("copies-supported")
                         .addKeyword("cups-version")
@@ -86,7 +86,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100.:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "alexvanboxel")
                         .addNameWithoutLanguage("job-name", "Blank Landscape Card")
                         .add49("document-format", "application/octet-stream")
@@ -97,7 +97,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100.:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "alexvanboxel")
                         .addKeyword("requested-attributes", "compression-supported")
                         .addKeyword("copies-supported")
@@ -127,7 +127,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100.:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "alexvanboxel")
                         .addNameWithoutLanguage("job-name", "Blank Landscape Card")
                         .build()).build();
@@ -137,7 +137,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100:631/ipp/print")
                         .addNameWithoutLanguage("requesting-user-name", "alexvanboxel")
                         .addKeyword("requested-attributes", "job-id")
                         .addKeyword("job-impressions-completed")
@@ -155,7 +155,7 @@ public class HttpTest {
                 IppAttributeGroup.builder().tag(1)
                         .addChar("attributes-charset", "utf-8")
                         .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://ICON-156d96.local.:631/ipp/print")
+                        .addURI("printer-uri", "ipp://192.168.1.100.:631/ipp/print")
                         .addInt("job-id", 4)
                         .addNameWithoutLanguage("requesting-user-name", "alexvanboxel")
                         .addBoolean("last-document", true)
@@ -217,7 +217,7 @@ public class HttpTest {
 
         RequestBody requestBody = RequestBody.create(IPP, send);
         Request request = new Request.Builder()
-                .url("http://ICON-156d96.local:631/ipp/print")
+                .url("http://192.168.1.100:631/ipp/print")
                 .header("Content-Type", "application/ipp")
                 .post(requestBody)
                 .build();
@@ -237,7 +237,7 @@ public class HttpTest {
         RequestBody requestBody = RequestBody.create(IPP, stream.toByteArray());
 
         Request request = new Request.Builder()
-                .url("http://ICON-156d96.local:631/ipp/print")
+                .url("http://192.168.1.100:631/ipp/print")
                 .header("Content-Type", "application/ipp")
                 .post(requestBody)
                 .build();
