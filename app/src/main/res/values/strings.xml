@@ -3,4 +3,8 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string-array name="type_badge_list">
+        <item>Press</item>
+        <item>VIP</item>
+    </string-array>
 </resources>

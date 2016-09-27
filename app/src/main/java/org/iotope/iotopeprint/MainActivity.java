@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         Resources res = getResources();
         imageView = (ImageView) findViewById(R.id.imageView);
-        qrView = (ImageView) findViewById(R.id.QRcode_image);
         formatTxt = (TextView) findViewById(R.id.scan_format) ;
         contentTxt = (TextView) findViewById(R.id.scan_content) ;
 
@@ -123,13 +122,12 @@ public class MainActivity extends AppCompatActivity{
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
-                    /*    try {
+                       /* try {
                             //printInit();
-                            //print();
+                            print();
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }
-                    */
+                        }*/
                         return null;
                     }
                 }.execute();
@@ -175,7 +173,7 @@ public class MainActivity extends AppCompatActivity{
             scanContent = scanningResult.getContents();
             scanFormat = scanningResult.getFormatName();
             formatTxt.setText("FORMAT: " + scanFormat);
-            //contentTxt.setText("CONTENT: " + scanContent);
+            contentTxt.setText("CONTENT: " + scanContent);
 
         }
         else{
@@ -267,7 +265,7 @@ public class MainActivity extends AppCompatActivity{
         if (scanContent != null){
             try {
                 Bitmap QRimage = encodeAsBitmap(scanContent);
-                canvas.drawBitmap(QRimage,700,200,null);
+                canvas.drawBitmap(QRimage,650,200,null);
 
 
             } catch (WriterException e) {
