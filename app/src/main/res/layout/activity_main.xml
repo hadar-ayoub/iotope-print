@@ -10,30 +10,45 @@
     android:padding="10dp"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/logo"
+        android:src="@drawable/badge_header_color"
+        />
+
     <EditText
         android:id="@+id/name"
         android:hint="Nom et prénom"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="5dp"
+        android:theme="@style/MyEditText"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_below="@id/logo"
         />
     <EditText
         android:id="@+id/company"
         android:hint="Société"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="5dp"
         android:layout_below="@id/name"
-
+        android:theme="@style/MyEditText"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         />
     <Spinner
+        android:id="@+id/type_badge"
+        android:entries="@array/type_badge_list"
+        android:layout_below="@id/company"
+        android:spinnerMode="dropdown"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Type de badge"
-        android:spinnerMode="dropdown"
-        android:entries="@array/type_badge_list"
-        android:id="@+id/type_badge"
-        android:layout_below="@id/company" />
+        android:theme="@style/MyEditText"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        />
     <Button
         android:id="@+id/valide_btn"
         android:text="Valider"
@@ -50,22 +65,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textIsSelectable="true"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/valide_btn"/>
+        android:layout_below="@id/valide_btn"
+        android:layout_alignStart="@+id/scan_content"
+        />
     <TextView
         android:id="@+id/scan_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textIsSelectable="true"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/scan_format" />
+        android:layout_below="@id/scan_format"
+        />
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:layout_below="@+id/print"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/scan_content"
+        android:layout_marginTop="20dp"
+        />
 
     <Button
         android:layout_width="75dp"
@@ -74,8 +92,7 @@
         android:text="Print"
         android:textColor="@color/white"
         android:id="@+id/print"
-        android:layout_marginTop="15dp"
-        android:layout_below="@+id/scan"
+        android:layout_alignTop="@+id/scan"
         android:layout_alignParentStart="true" />
 
     <Button
@@ -85,8 +102,7 @@
         android:text="Scan QRcode"
         android:textColor="@color/white"
         android:id="@+id/scan"
-        android:layout_marginTop="37dp"
-        android:layout_below="@+id/scan_content"
-        android:layout_alignParentStart="true"/>
+        android:layout_above="@+id/scan_format"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

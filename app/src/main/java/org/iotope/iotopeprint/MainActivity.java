@@ -2,12 +2,15 @@ package org.iotope.iotopeprint;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
@@ -19,11 +22,15 @@ import android.print.PrintAttributes;
 import android.print.pdf.PrintedPdfDocument;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +64,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import okio.Buffer;
 import okio.Okio;
@@ -67,7 +79,6 @@ import okio.Sink;
 public class MainActivity extends AppCompatActivity{
 
     private static final String url = "http://192.168.1.1:631/ipp/print";
-
     public static final MediaType IPP
             = MediaType.parse("application/ipp");
 
@@ -76,68 +87,90 @@ public class MainActivity extends AppCompatActivity{
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
+
     private GoogleApiClient client2;
     private TextView formatTxt, contentTxt;
-    private Button btn, scan;
-    private String scanContent, scanFormat;
+    private Button btn, scan,validate;
+    private EditText nameTxt, companyTxt;
+    private Spinner passList;
+    private String scanContent, scanFormat, resultat, jsonUrl;
     ImageView imageView, qrView;
+    DBAdapter dbAdapter;
+    Intent i;
+    HashMap<String,String> guest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Resources res = getResources();
+
+        // main Layout Component
         imageView = (ImageView) findViewById(R.id.imageView);
         formatTxt = (TextView) findViewById(R.id.scan_format) ;
         contentTxt = (TextView) findViewById(R.id.scan_content) ;
+        nameTxt =(EditText) findViewById(R.id.name);
+        companyTxt =(EditText) findViewById(R.id.company);
+        passList =(Spinner) findViewById(R.id.type_badge);
 
         btn = (Button) findViewById(R.id.print);
         scan = (Button) findViewById(R.id.scan);
-        btn.setEnabled(true);
-
+        validate = (Button) findViewById(R.id.valide_btn);
+        btn.setEnabled(false);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Imprimer l'étiquette",Toast.LENGTH_LONG).show();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        try {
+                            //printInit();
+                            print();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+
+                    }
+                }.execute();
+
+
+            }
+        });
+        validate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Buffer buffer2 = new Buffer();
+                Lwxl lwxl = new Lwxl(buffer2);
+                Bitmap bitmap = null;
                 try {
-                    Buffer buffer2 = new Buffer();
-                    Lwxl lwxl = new Lwxl(buffer2);
-                    lwxl.start();
-
-                    lwxl.length();
-                    lwxl.width();
-                    lwxl.escB(0x00);
-                    lwxl.esc66();
-
-                    Bitmap bitmap = createDoc(lwxl);
-                    imageView.setImageBitmap(bitmap);
-
-                    lwxl.formFeed();
-
-
-
+                    guest = new HashMap<String, String>();
+                    guest.put("full_name",nameTxt.getText().toString());
+                    guest.put("company",companyTxt.getText().toString());
+                    guest.put("pass",passList.getSelectedItem().toString());
+                    scanContent = guest.get("full_name")+"|"+guest.get("company")+"|"+guest.get("pass");
+                    Log.i("Guest full name", "onClick: "+guest.get("full_name"));
+                    Log.i("Guest company", "onClick: "+guest.get("company"));
+                    Log.i("Guest pass", "onClick: "+guest.get("pass"));
+                    if (nameTxt.getText() == null){
+                        btn.setEnabled(false);
+                    }
+                    else{
+                        btn.setEnabled(true);
+                        bitmap = createDoc(lwxl);
+                        imageView.setImageBitmap(bitmap);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                       /* try {
-                            //printInit();
-                            print();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }*/
-                        return null;
-                    }
-                }.execute();
+
             }
         });
 
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -149,6 +182,8 @@ public class MainActivity extends AppCompatActivity{
                 }.execute();
             }
         });
+
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -164,6 +199,7 @@ public class MainActivity extends AppCompatActivity{
             Toast.makeText(getApplicationContext(),"Imprimer l'étiquette",Toast.LENGTH_LONG).show();
         }
     }
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         //retrieve scan result
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
@@ -172,9 +208,33 @@ public class MainActivity extends AppCompatActivity{
 //we have a result
             scanContent = scanningResult.getContents();
             scanFormat = scanningResult.getFormatName();
-            formatTxt.setText("FORMAT: " + scanFormat);
-            contentTxt.setText("CONTENT: " + scanContent);
+            //formatTxt.setText("FORMAT: " + scanFormat);
+            //contentTxt.setText("CONTENT: " + scanContent);
 
+
+            List<String> divScanContent = DivScanContent(scanContent,"|");
+            Log.i("registration Code : ", divScanContent.get(1));
+            guest = DataBind(divScanContent.get(1));
+
+            if (guest == null){
+                Toast.makeText(getApplicationContext(),
+                        "L'invité n'est pas répértorié dans la base de donnée",Toast.LENGTH_LONG).show();
+                btn.setEnabled(false);
+            }
+            else {
+                // Create and print bitmap on imageView
+                btn.setEnabled(true);
+                Buffer buffer2 = new Buffer();
+                Lwxl lwxl = new Lwxl(buffer2);
+                Bitmap bitmap = null;
+                try {
+                    bitmap = createDoc(lwxl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                imageView.setImageBitmap(bitmap);
+
+            }
         }
         else{
             Toast toast = Toast.makeText(getApplicationContext(),
@@ -197,8 +257,20 @@ public class MainActivity extends AppCompatActivity{
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.initialise) {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
             return true;
+        }
+        if (id == R.id.load_data) {
+            Toast.makeText(getApplicationContext(),"Telechargement des données..." ,Toast.LENGTH_LONG).show();
+            new HttpAsyncTask().execute();
+            return true;
+        }
+        if (id == R.id.test_qrcode){
+            i = new Intent(this, TestQRcode.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);
@@ -209,10 +281,10 @@ public class MainActivity extends AppCompatActivity{
     public Bitmap createDoc(Lwxl lwxl) throws IOException {
 
         PrintAttributes.MediaSize m = new PrintAttributes.MediaSize(
-                "123", "123", 2000, 2000
+                "123", "123", 1000, 521
         );
         PrintAttributes.Resolution r = new PrintAttributes.Resolution(
-                "123", "123", 72, 72
+                "123", "123", 300, 300
         );
         PrintAttributes.Margins g = new PrintAttributes.Margins(
                 0, 0, 0, 0
@@ -229,10 +301,8 @@ public class MainActivity extends AppCompatActivity{
                 printAttributes);
 
         // start a page
-        PdfDocument.Page page = document.startPage(0);
+        //PdfDocument.Page page = document.startPage(0);
 
-        int titleBaseLine = 72;
-        int leftMargin = 54;
 
         Paint white = new Paint();
         white.setColor(Color.WHITE);
@@ -243,12 +313,13 @@ public class MainActivity extends AppCompatActivity{
         Paint text = new Paint();
         text.setColor(Color.BLACK);
 
-        Rect rect = new Rect(0, 0, 1000, 500);
+        Rect rect = new Rect(0, 0, 1000, 521);
         Bitmap original = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(original);
         canvas.drawRect(rect, white);
 
-
+        black.setStrokeWidth(5f);
+        canvas.drawLine(17,148,983,148,black);
 
         // fin  Modifcation ffor ticket
 
@@ -257,31 +328,31 @@ public class MainActivity extends AppCompatActivity{
         // d.draw(canvas);
 
         // fin  Modifcation ffor ticket
-
         Resources res = getResources();
-        Bitmap header = BitmapFactory.decodeResource(res, R.drawable.badge_header);
-        canvas.drawBitmap(header,0, 0 , null);
+        Bitmap header = BitmapFactory.decodeResource(res, R.drawable.logo_dark);
+        Bitmap resizedheader = getResizeBitmap(header,417,142);
+        //saveImageToInternalStorage(header);
+        canvas.drawBitmap(resizedheader,17, 0 , null);
 
         if (scanContent != null){
             try {
                 Bitmap QRimage = encodeAsBitmap(scanContent);
-                canvas.drawBitmap(QRimage,650,200,null);
-
+                canvas.drawBitmap(QRimage,583,152,null);
 
             } catch (WriterException e) {
                 e.printStackTrace();
             }
         }
-
-        text.setTextSize(80);
-        canvas.drawText("Ayoub Hadar", 50, 350, text);
-
+        Typeface currentTypeFace =   text.getTypeface();
+        Typeface bold = Typeface.create(currentTypeFace, Typeface.BOLD);
+        text.setTypeface(bold);
+        text.setTextSize(70);
+        canvas.drawText(guest.get("full_name"), 41, 330, text);
         text.setTextSize(48);
-        canvas.drawText("XHUB", 70, 420, text);
+        canvas.drawText(guest.get("company"), 58, 400  , text);
 
-        text.setTextSize(72);
-        text.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText("TRINGA", 970, 150, text);
+        text.setTextSize(70);
+        canvas.drawText(guest.get("pass").toUpperCase(), 650, 125, text);
 
         Bitmap bitmap = original;
 
@@ -292,7 +363,7 @@ public class MainActivity extends AppCompatActivity{
         for (int y = 0; y < bitmap.getHeight(); y++) {
 
             int b8 = 0x00;
-            int[] line = new int[256];
+            int[] line = new int[917];
             int length = 0;
 
             for (int x = 0; x < bitmap.getWidth(); x++) {
@@ -339,7 +410,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     // ipp app methodes
-    public void print() throws IOException {
+    public Bitmap print() throws IOException {
 
         IppRoot root = IppRoot.builder().getPrinterAttributes().request(1).add(
                 IppAttributeGroup.builder().tag(1)
@@ -465,7 +536,7 @@ public class MainActivity extends AppCompatActivity{
         lwxl.escB(0x00);
         lwxl.esc66();
 
-        createDoc(lwxl);
+        Bitmap bitmap = createDoc(lwxl);
         lwxl.formFeed();
 
         int bs1 = b1.length;
@@ -488,8 +559,8 @@ public class MainActivity extends AppCompatActivity{
         System.out.println(response.toString());
         IppParser parser = new IppParser();
         System.out.println(parser.read(response.body().source()));
+        return bitmap;
     }
-
     private IppRoot send(IppRoot root) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Sink sink = Okio.sink(stream);
@@ -548,27 +619,45 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-    public void save(Bitmap bitmap){
-        String root = Environment.DIRECTORY_DOWNLOADS;
-        System.out.println(root);
-        File myDir = new File(root);
-        myDir.mkdirs();
-
-        String fname = "save.jpg";
-        //if (file.exists ()) file.delete();
-
-        File file = new File (myDir, fname);
-        System.out.println(file.getPath());
+    // Image decoded to bitMap and resized to to the given argument
+    public Bitmap encodeAsBitmap(String str) throws WriterException {
+        BitMatrix result;
         try {
-            FileOutputStream out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            result = new MultiFormatWriter().encode(str,
+                    BarcodeFormat.QR_CODE, 400, 400, null);
+        } catch (IllegalArgumentException iae) {
+            // Unsupported format
+            return null;
         }
+        int w = result.getWidth();
+        int h = result.getHeight();
+        int[] pixels = new int[w * h];
+        for (int y = 0; y < h; y++) {
+            int offset = y * w;
+            for (int x = 0; x < w; x++) {
+                pixels[offset + x] = result.get(x, y) ? getResources().getColor(R.color.black):getResources().getColor(R.color.white);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, 400, 0, 0, w, h);
+        return bitmap;
+    } /// end of this method
+    public Bitmap getResizeBitmap(Bitmap b, int newWidth, int newHeight){
+        int width = b.getWidth();
+        int height = b.getHeight();
+        float scaleWidth = ((float) newWidth)/width;
+        float scaleHeight = ((float) newHeight)/height;
+        // Create Matrix for manipulation
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth,scaleHeight);
 
+        // recreate new bitmap
+        Bitmap resizedBitmap = Bitmap.createBitmap(b, 0,0,width,height,matrix,false);
+        b.recycle();
+        return resizedBitmap;
     }
+
+    // Save bitmap Image in mobile internal storage
     public boolean saveImageToInternalStorage(Bitmap image) {
 
 
@@ -589,29 +678,73 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
 
-    // this is method call from on create and return bitmap image of QRCode.
-    public Bitmap encodeAsBitmap(String str) throws WriterException {
-        BitMatrix result;
-        try {
-            result = new MultiFormatWriter().encode(str,
-                    BarcodeFormat.QR_CODE, 300, 300, null);
-        } catch (IllegalArgumentException iae) {
-            // Unsupported format
-            return null;
-        }
-        int w = result.getWidth();
-        int h = result.getHeight();
-        int[] pixels = new int[w * h];
-        for (int y = 0; y < h; y++) {
-            int offset = y * w;
-            for (int x = 0; x < w; x++) {
-                pixels[offset + x] = result.get(x, y) ? getResources().getColor(R.color.black):getResources().getColor(R.color.white);
+    // Interaction with DBAdapter
+    private class HttpAsyncTask extends AsyncTask<Object, Object, HashMap<String, HashMap>> {
+
+        @Override
+        protected HashMap<String, HashMap> doInBackground(Object... args) {
+            String myurl= "http://devoxx.ma/api/registerations";
+            //String myurl= "http://192.168.1.6/inscrits.txt";
+            WebService ws = new WebService();
+            ws.setURL(myurl);
+            HashMap<String,HashMap> result= ws.getServerData();
+            if(result == null){
+                Log.e("Error webservice", "doInBackground: Error Connexion to server");
+                return null;
+            }
+            else{
+                return result;
             }
         }
-        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, 300, 0, 0, w, h);
-        return bitmap;
-    } /// end of this method
+
+        @Override
+        protected void onPostExecute(HashMap<String, HashMap> result) {
+            if (result == null){
+                Toast.makeText(getApplicationContext(),"resultat non chargé",Toast.LENGTH_LONG);
+            }
+            else{
+                //txt.setText("");
+                dbAdapter = new DBAdapter(getApplicationContext());
+                dbAdapter = dbAdapter.open();
+                DBAdapter.DatabaseHelper dbHelper = dbAdapter.setDataBaseHelper(getApplicationContext());
+                dbHelper.onUpgrade(dbAdapter.getDb(),0,1);
+                dbAdapter.Truncate();
+
+                for (Map.Entry<String, HashMap> entry : result.entrySet()) {
+                    HashMap<String,String> guest = entry.getValue();
+                    dbAdapter.insererUnInscrits(guest.get("full_name"),entry.getKey(),guest.get("company"),guest.get("email"),guest.get("pass"),guest.get("conf_day"));
+                }
+                dbAdapter.close();
+            }
+        }
+    }
+    public HashMap<String,String> DataBind(String regcode){
+        dbAdapter = new DBAdapter(getApplicationContext());
+        dbAdapter = dbAdapter.open();
+        Cursor c = dbAdapter.getGuest(regcode);
+        HashMap<String,String> guestvalues = new HashMap<>();
+        if (c.getCount() == 0){
+            Log.i("0", "DataBind: Guest not found on the database ");
+            guestvalues = null;
+        }
+        else{
+            if (c.moveToFirst()){
+                do{
+                    guestvalues.put("registration_code", c.getString(c.getColumnIndex("registration_code")));
+                    guestvalues.put("full_name", c.getString(c.getColumnIndex("full_name")));
+                    guestvalues.put("company", c.getString(c.getColumnIndex("company")));
+                    guestvalues.put("email", c.getString(c.getColumnIndex("email")));
+                    guestvalues.put("pass", c.getString(c.getColumnIndex("pass")));
+                    guestvalues.put("conf_day", c.getString(c.getColumnIndex("conf_day")));
+                    // do what ever you want here
+                }while(c.moveToNext());
+            }
+
+        }
+        c.close();
+        dbAdapter.close();
+        return guestvalues;
+    }
 
     // Initial methodes of creating end printing Bitmap Canvas
     public void createDocInit(Lwxl lwxl) throws IOException {
@@ -722,8 +855,6 @@ public class MainActivity extends AppCompatActivity{
         }
 
         System.out.println();
-
-
     }
     public void printInit() throws IOException {
 
@@ -877,4 +1008,15 @@ public class MainActivity extends AppCompatActivity{
         IppParser parser = new IppParser();
         System.out.println(parser.read(response.body().source()));
     }
+
+
+    public List<String> DivScanContent(String scanContent, String delim){
+        List<String> data = new ArrayList();
+        StringTokenizer divScanContent = new StringTokenizer(scanContent,delim);
+        while (divScanContent.hasMoreElements()) {
+            data.add((String) divScanContent.nextElement());
+        }
+        return data;
+    }
+
 }
