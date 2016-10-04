@@ -11,7 +11,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,7 +28,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +43,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.google.zxing.qrcode.encoder.QRCode;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -66,7 +63,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -89,15 +85,17 @@ public class MainActivity extends AppCompatActivity{
      */
 
     private GoogleApiClient client2;
-    private TextView formatTxt, contentTxt;
+    private TextView contentTxt;
     private Button btn, scan,validate;
     private EditText nameTxt, companyTxt;
     private Spinner passList;
-    private String scanContent, scanFormat, resultat, jsonUrl;
-    ImageView imageView, qrView;
-    DBAdapter dbAdapter;
-    Intent i;
-    HashMap<String,String> guest;
+    private String scanContent;
+    private ImageView imageView;
+    private DBAdapter dbAdapter;
+    private Intent i;
+    private HashMap<String,String> guest;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +104,6 @@ public class MainActivity extends AppCompatActivity{
 
         // main Layout Component
         imageView = (ImageView) findViewById(R.id.imageView);
-        formatTxt = (TextView) findViewById(R.id.scan_format) ;
         contentTxt = (TextView) findViewById(R.id.scan_content) ;
         nameTxt =(EditText) findViewById(R.id.name);
         companyTxt =(EditText) findViewById(R.id.company);
@@ -123,9 +120,7 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     protected Void doInBackground(Void... params) {
                         try {
-                            //printInit();
                             print();
-
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -189,37 +184,22 @@ public class MainActivity extends AppCompatActivity{
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public void onClick(View v){
-//respond to clicks
-        if(v.getId()==R.id.scan){
-            IntentIntegrator scanIntegrator = new IntentIntegrator(MainActivity.this);
-            scanIntegrator.initiateScan();
-        }
-        if(v.getId()==R.id.print){
-            Toast.makeText(getApplicationContext(),"Imprimer l'étiquette",Toast.LENGTH_LONG).show();
-        }
-    }
-
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         //retrieve scan result
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
 
-//we have a result
             scanContent = scanningResult.getContents();
-            scanFormat = scanningResult.getFormatName();
-            //formatTxt.setText("FORMAT: " + scanFormat);
-            //contentTxt.setText("CONTENT: " + scanContent);
-
 
             List<String> divScanContent = DivScanContent(scanContent,"|");
             Log.i("registration Code : ", divScanContent.get(1));
             guest = DataBind(divScanContent.get(1));
 
             if (guest == null){
-                Toast.makeText(getApplicationContext(),
-                        "L'invité n'est pas répértorié dans la base de donnée",Toast.LENGTH_LONG).show();
+                contentTxt.setText("Le code d'enregistrement n'est pas répértorié sur la liste des invités");
+                //contentTxt.setTextColor(0xff0000);
                 btn.setEnabled(false);
+                imageView.setImageBitmap(null);
             }
             else {
                 // Create and print bitmap on imageView
@@ -232,6 +212,7 @@ public class MainActivity extends AppCompatActivity{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                contentTxt.setText(null);
                 imageView.setImageBitmap(bitmap);
 
             }
@@ -242,6 +223,7 @@ public class MainActivity extends AppCompatActivity{
             toast.show();
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -278,10 +260,10 @@ public class MainActivity extends AppCompatActivity{
 
 
     // canvas de l'étiquette
-    public Bitmap createDoc(Lwxl lwxl) throws IOException {
+    public Bitmap createDoc(Lwxl lwxl) throws IOException   {
 
         PrintAttributes.MediaSize m = new PrintAttributes.MediaSize(
-                "123", "123", 1000, 521
+                "123", "123", 1000, 500
         );
         PrintAttributes.Resolution r = new PrintAttributes.Resolution(
                 "123", "123", 300, 300
@@ -300,8 +282,6 @@ public class MainActivity extends AppCompatActivity{
         PrintedPdfDocument document = new PrintedPdfDocument(this,
                 printAttributes);
 
-        // start a page
-        //PdfDocument.Page page = document.startPage(0);
 
 
         Paint white = new Paint();
@@ -313,19 +293,16 @@ public class MainActivity extends AppCompatActivity{
         Paint text = new Paint();
         text.setColor(Color.BLACK);
 
-        Rect rect = new Rect(0, 0, 1000, 521);
+        Paint companyName = new Paint();
+        companyName.setColor(Color.BLACK);
+
+        Rect rect = new Rect(0, 0, 1000, 500);
         Bitmap original = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(original);
         canvas.drawRect(rect, white);
 
         black.setStrokeWidth(5f);
-        canvas.drawLine(17,148,983,148,black);
-
-        // fin  Modifcation ffor ticket
-
-        //  Drawable d = getDrawable(R.drawable.badge_header);
-        //  d.setBounds(0, 0, 0, 0);
-        // d.draw(canvas);
+        canvas.drawLine(17,142,983,142,black);
 
         // fin  Modifcation ffor ticket
         Resources res = getResources();
@@ -334,25 +311,45 @@ public class MainActivity extends AppCompatActivity{
         //saveImageToInternalStorage(header);
         canvas.drawBitmap(resizedheader,17, 0 , null);
 
-        if (scanContent != null){
+        if (guest != null){
             try {
-                Bitmap QRimage = encodeAsBitmap(scanContent);
-                canvas.drawBitmap(QRimage,583,152,null);
+                Bitmap QRimage = encodeAsBitmap(guest.get("full_name")+"|"+guest.get("email")+"|"+guest.get("company"));
+                canvas.drawBitmap(QRimage,630,147,null);
 
             } catch (WriterException e) {
                 e.printStackTrace();
             }
         }
+
         Typeface currentTypeFace =   text.getTypeface();
         Typeface bold = Typeface.create(currentTypeFace, Typeface.BOLD);
         text.setTypeface(bold);
         text.setTextSize(70);
-        canvas.drawText(guest.get("full_name"), 41, 330, text);
-        text.setTextSize(48);
-        canvas.drawText(guest.get("company"), 58, 400  , text);
+        companyName.setTextSize(48);
+
+        if (isLongerThanNameSize(guest.get("full_name"))){
+            String nameData = "";
+            String restData = "";
+            List<String> listPartName = DivScanContent(guest.get("full_name")," ");
+            for (int i = 0; i < listPartName.size(); i++) {
+                if (isLongerThanNameSize(nameData+listPartName.get(i))){
+                    restData += listPartName.get(i)+" ";
+                }
+                else {
+                    nameData += listPartName.get(i)+ " ";
+                }
+            }
+            canvas.drawText(nameData, 41, 300, text);
+            canvas.drawText(restData, 41, 370, text);
+            canvas.drawText(guest.get("company"), 58, 440  , companyName);
+        }
+        else{
+            canvas.drawText(guest.get("full_name"), 41, 330, text);
+            canvas.drawText(guest.get("company"), 58, 400  , companyName);
+        }
 
         text.setTextSize(70);
-        canvas.drawText(guest.get("pass").toUpperCase(), 650, 125, text);
+        canvas.drawText(guest.get("pass").toUpperCase(), 680, 125, text);
 
         Bitmap bitmap = original;
 
@@ -360,13 +357,13 @@ public class MainActivity extends AppCompatActivity{
         lwxl.escB(0);
         lwxl.escD(ooo);
 
-        for (int y = 0; y < bitmap.getHeight(); y++) {
+        for (int y = 0; y < original.getHeight(); y++) {
 
             int b8 = 0x00;
-            int[] line = new int[917];
+            int[] line = new int[1000];
             int length = 0;
 
-            for (int x = 0; x < bitmap.getWidth(); x++) {
+            for (int x = 0; x < original.getWidth(); x++) {
 
                 int p = bitmap.getPixel(x, y);
                 int red = Color.red(p);
@@ -388,13 +385,8 @@ public class MainActivity extends AppCompatActivity{
                 lwxl.writeByte(line[i]);
             }
         }
-        //saveImageToInternalStorage(bitmap);
-/*        try {
-            qrView.setImageBitmap(encodeAsBitmap(scanContent));
-        } catch (WriterException e) {
-            e.printStackTrace();
-        }
-*/        System.out.println();
+
+        System.out.println();
         return bitmap;
     }
 
@@ -624,7 +616,7 @@ public class MainActivity extends AppCompatActivity{
         BitMatrix result;
         try {
             result = new MultiFormatWriter().encode(str,
-                    BarcodeFormat.QR_CODE, 400, 400, null);
+                    BarcodeFormat.QR_CODE, 380, 380, null);
         } catch (IllegalArgumentException iae) {
             // Unsupported format
             return null;
@@ -639,7 +631,7 @@ public class MainActivity extends AppCompatActivity{
             }
         }
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, 400, 0, 0, w, h);
+        bitmap.setPixels(pixels, 0, 380, 0, 0, w, h);
         return bitmap;
     } /// end of this method
     public Bitmap getResizeBitmap(Bitmap b, int newWidth, int newHeight){
@@ -746,270 +738,7 @@ public class MainActivity extends AppCompatActivity{
         return guestvalues;
     }
 
-    // Initial methodes of creating end printing Bitmap Canvas
-    public void createDocInit(Lwxl lwxl) throws IOException {
-
-        PrintAttributes.MediaSize m = new PrintAttributes.MediaSize(
-                "123", "123", 2000, 2000
-        );
-        PrintAttributes.Resolution r = new PrintAttributes.Resolution(
-                "123", "123", 72, 72
-        );
-        PrintAttributes.Margins g = new PrintAttributes.Margins(
-                0, 0, 0, 0
-        );
-
-        PrintAttributes printAttributes = new PrintAttributes.Builder()
-                .setColorMode(PrintAttributes.COLOR_MODE_MONOCHROME)
-                .setMediaSize(m)
-                .setResolution(r)
-                .setMinMargins(g)
-                .build();
-
-        PrintedPdfDocument document = new PrintedPdfDocument(this,
-                printAttributes);
-
-        // start a page
-        PdfDocument.Page page = document.startPage(0);
-
-        int titleBaseLine = 72;
-        int leftMargin = 54;
-
-        Paint white = new Paint();
-        white.setColor(Color.WHITE);
-
-        Paint black = new Paint();
-        black.setColor(Color.BLACK);
-
-        Paint text = new Paint();
-        text.setColor(Color.BLACK);
-
-        Rect rect = new Rect(0, 0, 2000, 501);
-        Bitmap original = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(original);
-        canvas.drawRect(rect, white);
-
-        canvas.drawLine(0, 0, 2000, 0, black);
-        canvas.drawLine(0, 0, 0, 500, black);
-
-        for (int lx = 0; lx <= 2000; lx += 80) {
-            canvas.drawLine(lx, 0, lx, 25, black);
-        }
-        for (int lx = 40; lx <= 2000; lx += 80) {
-            canvas.drawLine(lx, 25, lx, 50, black);
-        }
-        for (int lx = 20; lx <= 2000; lx += 40) {
-            canvas.drawLine(lx, 50, lx, 100, black);
-        }
-
-        for (int lx = 0; lx <= 2000; lx += 100) {
-            canvas.drawLine(lx, 100, lx, 500, black);
-        }
-        for (int ly = 0; ly <= 500; ly += 100) {
-            canvas.drawLine(0, ly, 2000, ly, black);
-        }
-
-        canvas.drawLine(0, 0, 255, 255, black);
-
-        text.setTextSize(42);
-        canvas.drawText("Test Title", leftMargin, titleBaseLine + 100, text);
-
-        text.setTextSize(32);
-        canvas.drawText("Test paragraph", leftMargin, titleBaseLine + 150, text);
-
-        Bitmap bitmap = original;
-
-        int ooo = 125;
-        lwxl.escB(0);
-        lwxl.escD(ooo);
-
-        for (int y = 0; y < bitmap.getHeight(); y++) {
-
-            int b8 = 0x00;
-            int[] line = new int[256];
-            int length = 0;
-
-            for (int x = 0; x < bitmap.getWidth(); x++) {
-
-                int p = bitmap.getPixel(x, y);
-                int red = Color.red(p);
-                int blue = Color.blue(p);
-                int green = Color.green(p);
-                if (red == 0 && blue == 0 && green == 0) {
-                    b8 = b8 | (0x01 << (7 - (x % 8)));
-                }
-
-                if ((x % 8) == 7) {
-                    line[length++] = b8;
-                    // write byte
-                    b8 = 0;
-                }
-
-
-            }
-
-            lwxl.sync();
-            for (int i = 0; i < ooo; i++) {
-                lwxl.writeByte(line[i]);
-            }
-        }
-
-        System.out.println();
-    }
-    public void printInit() throws IOException {
-
-        IppRoot root = IppRoot.builder().getPrinterAttributes().request(1).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addKeyword("requested-attributes", "compression-supported")
-                        .addKeyword("copies-supported")
-                        .addKeyword("cups-version")
-                        .addKeyword("document-format-supported")
-                        .addKeyword("marker-colors")
-                        .addKeyword("marker-high-levels")
-                        .addKeyword("marker-levels")
-                        .addKeyword("marker-low-levels")
-                        .addKeyword("marker-message")
-                        .addKeyword("marker-names")
-                        .addKeyword("marker-types")
-                        .addKeyword("media-col-supported")
-                        .addKeyword("multiple-document-handling-supported")
-                        .addKeyword("operations-supported")
-                        .addKeyword("print-color-mode-supported")
-                        .addKeyword("printer-alert")
-                        .addKeyword("printer-alert-description")
-                        .addKeyword("printer-is-accepting-jobs")
-                        .addKeyword("printer-state")
-                        .addKeyword("printer-state-message")
-                        .addKeyword("printer-state-reasons")
-                        .build()).build();
-        System.out.println(send(root).toString());
-
-
-        root = IppRoot.builder().validateJob().request(2).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addNameWithoutLanguage("requesting-user-name", "username")
-                        .addNameWithoutLanguage("job-name", "Blank Landscape Card")
-                        .add49("document-format", "application/octet-stream")
-                        .build()).build();
-        System.out.println(send(root).toString());
-
-        root = IppRoot.builder().getPrinterAttributes().request(3).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addNameWithoutLanguage("requesting-user-name", "username")
-                        .addKeyword("requested-attributes", "compression-supported")
-                        .addKeyword("copies-supported")
-                        .addKeyword("cups-version")
-                        .addKeyword("document-format-supported")
-                        .addKeyword("marker-colors")
-                        .addKeyword("marker-high-levels")
-                        .addKeyword("marker-levels")
-                        .addKeyword("marker-low-levels")
-                        .addKeyword("marker-message")
-                        .addKeyword("marker-names")
-                        .addKeyword("marker-types")
-                        .addKeyword("media-col-supported")
-                        .addKeyword("multiple-document-handling-supported")
-                        .addKeyword("operations-supported")
-                        .addKeyword("print-color-mode-supported")
-                        .addKeyword("printer-alert")
-                        .addKeyword("printer-alert-description")
-                        .addKeyword("printer-is-accepting-jobs")
-                        .addKeyword("printer-state")
-                        .addKeyword("printer-state-message")
-                        .addKeyword("printer-state-reasons")
-                        .build()).build();
-        System.out.println(send(root).toString());
-
-        root = IppRoot.builder().createJob().request(4).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addNameWithoutLanguage("requesting-user-name", "username")
-                        .addNameWithoutLanguage("job-name", "Blank Landscape Card")
-                        .build()).build();
-        System.out.println(send(root).toString());
-
-        root = IppRoot.builder().getJobs().request(5).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addNameWithoutLanguage("requesting-user-name", "username")
-                        .addKeyword("requested-attributes", "job-id")
-                        .addKeyword("job-impressions-completed")
-                        .addKeyword("job-media-sheets-completed")
-                        .addKeyword("job-name")
-                        .addKeyword("job-originating-user-name")
-                        .addKeyword("job-state")
-                        .addKeyword("job-state-reasons")
-                        .build()).build();
-        System.out.println(send(root).toString());
-
-        // **************************>
-
-        root = IppRoot.builder().sendDocument().request(8).add(
-                IppAttributeGroup.builder().tag(1)
-                        .addChar("attributes-charset", "utf-8")
-                        .addNaturalChar("attributes-natural-language", "en-us")
-                        .addURI("printer-uri", "ipp://192.168.1.1:631/ipp/print")
-                        .addInt("job-id", 4)
-                        .addNameWithoutLanguage("requesting-user-name", "username")
-                        .addBoolean("last-document", true)
-                        .add49("document-format", "application/octet-stream")
-                        .build()).build();
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Sink sink = Okio.sink(stream);
-        IppWriter writer = new IppWriter();
-        writer.write(sink, root);
-        byte[] b1 = stream.toByteArray();
-
-
-        Buffer buffer2 = new Buffer();
-        Lwxl lwxl = new Lwxl(buffer2);
-        lwxl.start();
-
-        lwxl.length();
-        lwxl.width();
-        lwxl.escB(0x00);
-        lwxl.esc66();
-
-        createDocInit(lwxl);
-        lwxl.formFeed();
-
-        int bs1 = b1.length;
-        int bs2 = (int) buffer2.size();
-        byte[] send = new byte[bs1 + bs2];
-
-        byte[] bytes = buffer2.readByteArray();
-        System.arraycopy(b1, 0, send, 0, bs1);
-        System.arraycopy(bytes, 0, send, bs1, bs2);
-
-        RequestBody requestBody = RequestBody.create(IPP, send);
-        Request request = new Request.Builder()
-                .url(url)
-                .header("Content-Type", "application/ipp")
-                .post(requestBody)
-                .build();
-
-        Response response = client.newCall(request).execute();
-
-        System.out.println(response.toString());
-        IppParser parser = new IppParser();
-        System.out.println(parser.read(response.body().source()));
-    }
-
-
+    // divide QR code scan content method
     public List<String> DivScanContent(String scanContent, String delim){
         List<String> data = new ArrayList();
         StringTokenizer divScanContent = new StringTokenizer(scanContent,delim);
@@ -1017,6 +746,16 @@ public class MainActivity extends AppCompatActivity{
             data.add((String) divScanContent.nextElement());
         }
         return data;
+    }
+
+    // test lenght full name
+    public boolean isLongerThanNameSize(String name){
+        if(name.length() > 14){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 }
