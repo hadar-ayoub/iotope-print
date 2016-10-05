@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity{
     private EditText nameTxt, companyTxt;
     private Spinner passList;
     private String scanContent;
-    private ImageView imageView;
+    private ImageView imageView,logo;
     private DBAdapter dbAdapter;
     private Intent i;
     private HashMap<String,String> guest;
@@ -104,10 +104,15 @@ public class MainActivity extends AppCompatActivity{
 
         // main Layout Component
         imageView = (ImageView) findViewById(R.id.imageView);
+        logo = (ImageView) findViewById(R.id.logo);
         contentTxt = (TextView) findViewById(R.id.scan_content) ;
         nameTxt =(EditText) findViewById(R.id.name);
         companyTxt =(EditText) findViewById(R.id.company);
         passList =(Spinner) findViewById(R.id.type_badge);
+
+        Bitmap resizedlogo = getResizeBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.xhub),320,160);
+        logo.setImageBitmap(resizedlogo);
+
 
         btn = (Button) findViewById(R.id.print);
         scan = (Button) findViewById(R.id.scan);
@@ -116,20 +121,7 @@ public class MainActivity extends AppCompatActivity{
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        try {
-                            print();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-
-                    }
-                }.execute();
-
-
+                new PrintAsyncTask().execute();
             }
         });
         validate.setOnClickListener(new View.OnClickListener() {
@@ -196,6 +188,7 @@ public class MainActivity extends AppCompatActivity{
             guest = DataBind(divScanContent.get(1));
 
             if (guest == null){
+                contentTxt.setTextColor(getResources().getColor(R.color.red));
                 contentTxt.setText("Le code d'enregistrement n'est pas répértorié sur la liste des invités");
                 //contentTxt.setTextColor(0xff0000);
                 btn.setEnabled(false);
@@ -263,7 +256,7 @@ public class MainActivity extends AppCompatActivity{
     public Bitmap createDoc(Lwxl lwxl) throws IOException   {
 
         PrintAttributes.MediaSize m = new PrintAttributes.MediaSize(
-                "123", "123", 1000, 500
+                "123", "123", 1000, 360
         );
         PrintAttributes.Resolution r = new PrintAttributes.Resolution(
                 "123", "123", 300, 300
@@ -296,25 +289,24 @@ public class MainActivity extends AppCompatActivity{
         Paint companyName = new Paint();
         companyName.setColor(Color.BLACK);
 
-        Rect rect = new Rect(0, 0, 1000, 500);
+        Rect rect = new Rect(0, 0, 1000, 360);
         Bitmap original = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(original);
         canvas.drawRect(rect, white);
 
         black.setStrokeWidth(5f);
-        canvas.drawLine(17,142,983,142,black);
+        canvas.drawLine(20,100,983,100,black);
 
         // fin  Modifcation ffor ticket
-        Resources res = getResources();
-        Bitmap header = BitmapFactory.decodeResource(res, R.drawable.logo_dark);
-        Bitmap resizedheader = getResizeBitmap(header,417,142);
+        Bitmap resizedheader = getResizeBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.logo_dark),230,100);
+
         //saveImageToInternalStorage(header);
-        canvas.drawBitmap(resizedheader,17, 0 , null);
+        canvas.drawBitmap(resizedheader,20, 0 , null);
 
         if (guest != null){
             try {
                 Bitmap QRimage = encodeAsBitmap(guest.get("full_name")+"|"+guest.get("email")+"|"+guest.get("company"));
-                canvas.drawBitmap(QRimage,630,147,null);
+                canvas.drawBitmap(QRimage,640,0,null);
 
             } catch (WriterException e) {
                 e.printStackTrace();
@@ -339,17 +331,17 @@ public class MainActivity extends AppCompatActivity{
                     nameData += listPartName.get(i)+ " ";
                 }
             }
-            canvas.drawText(nameData, 41, 300, text);
-            canvas.drawText(restData, 41, 370, text);
-            canvas.drawText(guest.get("company"), 58, 440  , companyName);
+            canvas.drawText(nameData, 41, 170, text);
+            canvas.drawText(restData, 41, 230, text);
+            canvas.drawText(guest.get("company"), 58, 290  , companyName);
         }
         else{
-            canvas.drawText(guest.get("full_name"), 41, 330, text);
-            canvas.drawText(guest.get("company"), 58, 400  , companyName);
+            canvas.drawText(guest.get("full_name"), 41, 220, text);
+            canvas.drawText(guest.get("company"), 58, 270  , companyName);
         }
 
-        text.setTextSize(70);
-        canvas.drawText(guest.get("pass").toUpperCase(), 680, 125, text);
+        text.setTextSize(50);
+        canvas.drawText(guest.get("pass").toUpperCase(), 450, 90, text);
 
         Bitmap bitmap = original;
 
@@ -365,7 +357,7 @@ public class MainActivity extends AppCompatActivity{
 
             for (int x = 0; x < original.getWidth(); x++) {
 
-                int p = bitmap.getPixel(x, y);
+                int p = original.getPixel(x, y);
                 int red = Color.red(p);
                 int blue = Color.blue(p);
                 int green = Color.green(p);
@@ -388,17 +380,6 @@ public class MainActivity extends AppCompatActivity{
 
         System.out.println();
         return bitmap;
-    }
-
-    public ParcelFileDescriptor openFile(File file) throws FileNotFoundException {
-        if (file.exists()) {
-            ParcelFileDescriptor parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            System.out.println(parcel);
-
-            return parcel;
-        } else {
-            return null;
-        }
     }
 
     // ipp app methodes
@@ -616,7 +597,7 @@ public class MainActivity extends AppCompatActivity{
         BitMatrix result;
         try {
             result = new MultiFormatWriter().encode(str,
-                    BarcodeFormat.QR_CODE, 380, 380, null);
+                    BarcodeFormat.QR_CODE, 360, 360, null);
         } catch (IllegalArgumentException iae) {
             // Unsupported format
             return null;
@@ -631,7 +612,7 @@ public class MainActivity extends AppCompatActivity{
             }
         }
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, 380, 0, 0, w, h);
+        bitmap.setPixels(pixels, 0, 360, 0, 0, w, h);
         return bitmap;
     } /// end of this method
     public Bitmap getResizeBitmap(Bitmap b, int newWidth, int newHeight){
@@ -707,6 +688,34 @@ public class MainActivity extends AppCompatActivity{
                     dbAdapter.insererUnInscrits(guest.get("full_name"),entry.getKey(),guest.get("company"),guest.get("email"),guest.get("pass"),guest.get("conf_day"));
                 }
                 dbAdapter.close();
+            }
+        }
+    }
+    private class PrintAsyncTask extends AsyncTask<Object, Object, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Object... args) {
+            try {
+                print();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return true;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean b) {
+            if (b){
+                contentTxt.setTextColor(getResources().getColor(R.color.red));
+                contentTxt.setText("Impossible d'imprimer l'étiquette, " +
+                        "veuillez vous assurer que vous etes connecté à ICON-XXXXXX");
+            }
+            else{
+                contentTxt.setTextColor(getResources().getColor(R.color.lightgreen));
+                contentTxt.setText("félicitation ! L'impression s'est bien éfféctué.");
+                btn.setEnabled(false);
             }
         }
     }

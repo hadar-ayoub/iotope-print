@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/logo"
-        android:src="@drawable/badge_header_color"
+        android:src="@drawable/xhub"
         />
 
     <EditText
@@ -68,7 +68,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:textColor="@color/red"
-        android:layout_marginTop="370dp" />
+        android:layout_marginTop="320dp" />
 
     <ImageView
         android:layout_width="match_parent"
