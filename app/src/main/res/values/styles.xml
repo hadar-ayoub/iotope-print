@@ -1,20 +1,33 @@
 <resources>
     <color name="black">#000000</color>
-    <color name="red">#ff0000</color>
     <color name="white">#ffffff</color>
     <color name="grey">#aaaaaa</color>
     <color name="darkgreen">#228021</color>
     <color name="lightgreen">#4fcf4f</color>
+    <color name="lightgrey">#e6e6e6</color>
+    <color name="mauve">#b264ba</color>
+    <color name="skyblue">#0bfaf4</color>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
+
     <style name="MyEditText" parent="Theme.AppCompat.Light">
         <item name="colorControlNormal">@color/black</item>
         <item name="colorControlActivated">@color/lightgreen</item>
     </style>
+
     <style name="MyDarkToolbarStyle" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:colorBackground">@color/lightgreen</item>
         <item name="android:textColor">@color/black</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

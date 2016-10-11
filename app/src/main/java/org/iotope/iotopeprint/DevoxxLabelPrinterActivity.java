@@ -1,5 +1,6 @@
 package org.iotope.iotopeprint;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -11,12 +12,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.print.PrintAttributes;
 import android.print.pdf.PrintedPdfDocument;
 import android.provider.MediaStore;
@@ -37,7 +36,6 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
@@ -57,7 +55,6 @@ import org.iotope.ipp.Lwxl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,7 +69,7 @@ import okio.Okio;
 import okio.Sink;
 
 
-public class MainActivity extends AppCompatActivity{
+public class DevoxxLabelPrinterActivity extends Activity {
 
     private static final String url = "http://192.168.1.1:631/ipp/print";
     public static final MediaType IPP
@@ -99,19 +96,16 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_devoxx_label_printer);
         Resources res = getResources();
 
         // main Layout Component
         imageView = (ImageView) findViewById(R.id.imageView);
-        logo = (ImageView) findViewById(R.id.logo);
         contentTxt = (TextView) findViewById(R.id.scan_content) ;
         nameTxt =(EditText) findViewById(R.id.name);
         companyTxt =(EditText) findViewById(R.id.company);
         passList =(Spinner) findViewById(R.id.type_badge);
 
-        Bitmap resizedlogo = getResizeBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.xhub),320,160);
-        logo.setImageBitmap(resizedlogo);
 
 
         btn = (Button) findViewById(R.id.print);
@@ -162,7 +156,7 @@ public class MainActivity extends AppCompatActivity{
 
                     @Override
                     protected Void doInBackground(Void... params) {
-                        IntentIntegrator scanIntegrator = new IntentIntegrator(MainActivity.this);
+                        IntentIntegrator scanIntegrator = new IntentIntegrator(DevoxxLabelPrinterActivity.this);
                         scanIntegrator.initiateScan();
                         return null;
                     }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_home"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.iotope.iotopeprint.HomeActivity">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_player"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        style="@style/Topeka.TextAppearance.Title"
+        android:background="@color/background_material_dark"
+        android:elevation="@dimen/elevation_header"
+        tools:ignore="UnusedAttribute">
+
+        <org.iotope.iotopeprint.AvatarView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/size_avatar_toolbar"
+            android:layout_height="@dimen/size_avatar_toolbar"
+            android:layout_marginEnd="@dimen/spacing_double"
+            android:layout_marginRight="@dimen/spacing_double"
+            android:src='@drawable/xhub'
+            tools:ignore="UnusedAttribute" />
+
+        <TextView android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='Label Leitz Icon Printer'
+            tools:ignore="PrivateResource"
+            style="@style/Topeka.TextAppearance.Title.Inverse"
+            android:layout_gravity="center_vertical|start" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/devoxx_for_kids_layout"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/devoxx_layout"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:layout_width="319dp"
+            android:layout_height="127dp"
+            android:layout_gravity="center"
+            android:src="@drawable/devoxx_for_kids_logo"
+            android:background="@color/theme_blue_primary"
+            />
+
+        <TextView
+            android:id="@+id/devoxx_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Devoxx for kids "
+            android:textColor="@color/theme_blue_text"
+            android:layout_gravity="bottom"
+            android:textAppearance="@style/Topeka.TextAppearance.CategoryItem"
+            android:background="@color/theme_blue_primary_dark"
+            android:padding="@dimen/spacing_double"
+            android:gravity="center"
+            tools:targetApi="lollipop"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/devoxx_layout"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/toolbar_player"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:layout_width="319dp"
+            android:layout_height="118dp"
+            android:layout_gravity="center"
+            android:src="@drawable/devoxx_logo"
+            android:background="@color/theme_purple_background"
+            />
+        <TextView
+            android:id="@+id/category_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Devoxx Morocco"
+            android:textColor="@color/theme_blue_text"
+            android:layout_gravity="bottom"
+            android:textAppearance="@style/Topeka.TextAppearance.CategoryItem"
+            android:padding="@dimen/spacing_double"
+            android:background="@color/theme_purple_primary"
+            android:gravity="center"
+            tools:targetApi="lollipop"/>
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>

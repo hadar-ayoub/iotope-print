@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Devox Badge Printer</string>
+    <string name="app_name">QR Label Printer</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -7,4 +7,18 @@
         <item>Press</item>
         <item>VIP</item>
     </string-array>
+
+    <string-array name="city_list">
+        <item>Casablanca</item>
+        <item>Rabat</item>
+        <item>Tanger</item>
+        <item>Marrakech</item>
+        <item>Fes</item>
+        <item>El Hoceima</item>
+    </string-array>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="category">Category</string>
+
 </resources>

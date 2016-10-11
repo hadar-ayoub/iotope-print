@@ -41,8 +41,6 @@ public class WebService {
     public HashMap<String,HashMap> getServerData() {
         InputStream is = null;
         String result = "";
-
-
         // Envoie de la commande http
         is = SendHttpRequest(apiKey);
 
