@@ -17,11 +17,13 @@ import android.print.pdf.PrintedPdfDocument;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -42,9 +44,13 @@ import org.iotope.ipp.IppParser;
 import org.iotope.ipp.IppRoot;
 import org.iotope.ipp.IppWriter;
 import org.iotope.ipp.Lwxl;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +59,9 @@ import java.util.StringTokenizer;
 import okio.Buffer;
 import okio.Okio;
 import okio.Sink;
+
+import static android.R.attr.data;
+import static com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.L;
 
 public class DevoxxForKidsLabelPrinterActivity extends Activity {
 
@@ -87,6 +96,8 @@ public class DevoxxForKidsLabelPrinterActivity extends Activity {
         schoolTxt =(EditText) findViewById(R.id.school_kid);
         cityList = (Spinner) findViewById(R.id.cities);
 
+        setCitiesAdapter(loadJSONFromAsset());
+
         //Bitmap resizedlogo = getResizeBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.xhub),320,160);
         //logo.setImageBitmap(resizedlogo);
 
@@ -95,6 +106,7 @@ public class DevoxxForKidsLabelPrinterActivity extends Activity {
         print.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                print.setEnabled(false);
                 new PrintAsyncTask().execute();
             }
         });
@@ -483,12 +495,15 @@ public class DevoxxForKidsLabelPrinterActivity extends Activity {
                 notifs.setTextColor(getResources().getColor(R.color.red));
                 notifs.setText("Impossible d'imprimer l'étiquette, " +
                         "veuillez vous assurer que vous etes connecté à ICON-XXXXXX");
+                print.setEnabled(true);
             }
             else{
 
                 notifs.setTextColor(getResources().getColor(R.color.lightgreen));
                 notifs.setText("félicitation ! L'impression s'est bien éfféctué.");
                 print.setEnabled(false);
+                nameTxt.setText("");
+                schoolTxt.setText("");
             }
         }
     }
@@ -530,6 +545,40 @@ public class DevoxxForKidsLabelPrinterActivity extends Activity {
         b.recycle();
         return resizedBitmap;
     }
+
+    public void setCitiesAdapter(String dataCities){
+        List<String> cities = new ArrayList();
+        try {
+            JSONObject citiesObject = new JSONObject(dataCities);
+            JSONArray citiesarray = new JSONArray(citiesObject.getString("ville"));
+            for (int i = 0; i < citiesarray.length(); i++){
+                cities.add(citiesarray.getString(i));
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_spinner_dropdown_item, cities);
+            cityList.setAdapter(adapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext()," parse  data problem",Toast.LENGTH_LONG).show();
+        }
+    }
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = getResources().openRawResource
+                    (getResources().getIdentifier("villes","raw",getPackageName()));
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
 
     // divide QR code scan content method
     public List<String> DivScanContent(String scanContent, String delim){

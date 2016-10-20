@@ -10,4 +10,9 @@
             <solid android:color="@color/theme_blue_primary_dark"/>
         </shape>
     </item>
+    <item android:state_enabled="false">
+        <shape android:shape="oval">
+            <solid android:color="@color/white"/>
+        </shape>
+    </item>
 </selector>

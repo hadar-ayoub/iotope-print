@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         style="@style/Topeka.TextAppearance.Title"
-        android:background="@color/background_material_dark"
+        android:background="@color/light_grey"
         android:elevation="@dimen/elevation_header"
         tools:ignore="UnusedAttribute">
 
         <org.iotope.iotopeprint.AvatarView
             android:id="@+id/avatar"
-            android:layout_width="@dimen/size_avatar_toolbar"
-            android:layout_height="@dimen/size_avatar_toolbar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginEnd="@dimen/spacing_double"
             android:layout_marginRight="@dimen/spacing_double"
             android:src='@drawable/xhub'
@@ -26,7 +26,8 @@
         <TextView android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='Label Leitz Icon Printer'
+            android:text='Leitz Icon Label Printer'
+            android:textColor="@color/theme_purple_accent"
             tools:ignore="PrivateResource"
             style="@style/Topeka.TextAppearance.Title.Inverse"
             android:layout_gravity="center_vertical|start" />

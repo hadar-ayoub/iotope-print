@@ -30,6 +30,21 @@
             android:textColor="@color/theme_purple_accent"
             style="@style/Topeka.TextAppearance.Title.Inverse"
             android:layout_gravity="center_vertical|start" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/menu_layout"
+            android:gravity="right"
+            android:layout_marginLeft="50dp"
+            android:background="@color/zxing_transparent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true">
+            <ImageView
+                android:id="@+id/menu_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_menu" />
+        </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
 

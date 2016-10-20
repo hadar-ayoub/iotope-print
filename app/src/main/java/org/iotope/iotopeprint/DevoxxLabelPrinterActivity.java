@@ -19,7 +19,9 @@ import android.os.Environment;
 import android.print.PrintAttributes;
 import android.print.pdf.PrintedPdfDocument;
 import android.provider.MediaStore;
+import android.support.annotation.RawRes;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,15 +86,21 @@ public class DevoxxLabelPrinterActivity extends Activity {
      */
 
     private GoogleApiClient client2;
+
+    // Components
     private TextView contentTxt;
     private Button btn, scan,validate;
     private EditText nameTxt, companyTxt;
     private Spinner passList;
     private String scanContent;
     private ImageView imageView,logo;
+    private RelativeLayout menuLayout;
+
+    // Divers
     private DBAdapter dbAdapter;
     private Intent i;
     private HashMap<String,String> guest;
+
 
 
     @Override
@@ -107,17 +117,21 @@ public class DevoxxLabelPrinterActivity extends Activity {
         passList =(Spinner) findViewById(R.id.type_badge);
 
 
-
         btn = (Button) findViewById(R.id.print);
         scan = (Button) findViewById(R.id.scan);
         validate = (Button) findViewById(R.id.valide_btn);
         btn.setEnabled(false);
+
+
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                btn.setEnabled(false);
                 new PrintAsyncTask().execute();
             }
         });
+
+
         validate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +143,7 @@ public class DevoxxLabelPrinterActivity extends Activity {
                     guest.put("full_name",nameTxt.getText().toString());
                     guest.put("company",companyTxt.getText().toString());
                     guest.put("pass",passList.getSelectedItem().toString());
-                    scanContent = guest.get("full_name")+"|"+guest.get("company")+"|"+guest.get("pass");
+                    scanContent = guest.get("full_name")+"::"+guest.get("company")+"::"+guest.get("pass");
                     Log.i("Guest full name", "onClick: "+guest.get("full_name"));
                     Log.i("Guest company", "onClick: "+guest.get("company"));
                     Log.i("Guest pass", "onClick: "+guest.get("pass"));
@@ -156,13 +170,62 @@ public class DevoxxLabelPrinterActivity extends Activity {
 
                     @Override
                     protected Void doInBackground(Void... params) {
-                        IntentIntegrator scanIntegrator = new IntentIntegrator(DevoxxLabelPrinterActivity.this);
-                        scanIntegrator.initiateScan();
+                        try {
+                            IntentIntegrator scanIntegrator = new IntentIntegrator(DevoxxLabelPrinterActivity.this);
+                            scanIntegrator.initiateScan();
+                        }
+                        catch (Exception e){
+                            Log.e("QR Scanner Error", "doInBackground: QR not fount", e);
+                        }
                         return null;
                     }
                 }.execute();
             }
         });
+
+        menuLayout = (RelativeLayout) findViewById(R.id.menu_layout);
+
+        menuLayout.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(DevoxxLabelPrinterActivity.this, menuLayout);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.menu_main, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // Handle action bar item clicks here. The action bar will
+                        // automatically handle clicks on the Home/Up button, so long
+                        // as you specify a parent activity in AndroidManifest.xml.
+                        int id = item.getItemId();
+
+                        //noinspection SimplifiableIfStatement
+                        if (id == R.id.initialise) {
+                            Intent intent = getIntent();
+                            finish();
+                            startActivity(intent);
+                        }
+                        if (id == R.id.load_data) {
+                            Toast.makeText(getApplicationContext(),"Telechargement des données..." ,Toast.LENGTH_LONG).show();
+                            new HttpAsyncTask().execute();
+                            return true;
+                        }
+                        if (id == R.id.test_qrcode){
+                            i = new Intent(getApplicationContext(), TestQRcode.class);
+                            startActivity(i);
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show(); //showing popup menu
+            }
+        });
+
 
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -176,31 +239,38 @@ public class DevoxxLabelPrinterActivity extends Activity {
         if (scanningResult != null) {
 
             scanContent = scanningResult.getContents();
+            if(scanContent != null){
+                List<String> divScanContent = DivScanContent(scanContent,"|");
+                Log.i("registration Code : ", divScanContent.get(1));
+                guest = DataBind(divScanContent.get(1));
 
-            List<String> divScanContent = DivScanContent(scanContent,"|");
-            Log.i("registration Code : ", divScanContent.get(1));
-            guest = DataBind(divScanContent.get(1));
-
-            if (guest == null){
-                contentTxt.setTextColor(getResources().getColor(R.color.red));
-                contentTxt.setText("Le code d'enregistrement n'est pas répértorié sur la liste des invités");
-                //contentTxt.setTextColor(0xff0000);
-                btn.setEnabled(false);
-                imageView.setImageBitmap(null);
-            }
-            else {
-                // Create and print bitmap on imageView
-                btn.setEnabled(true);
-                Buffer buffer2 = new Buffer();
-                Lwxl lwxl = new Lwxl(buffer2);
-                Bitmap bitmap = null;
-                try {
-                    bitmap = createDoc(lwxl);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (guest == null){
+                    contentTxt.setTextColor(getResources().getColor(R.color.red));
+                    contentTxt.setText("Le code d'enregistrement n'est pas répértorié sur la liste des invités");
+                    //contentTxt.setTextColor(0xff0000);
+                    btn.setEnabled(false);
+                    imageView.setImageBitmap(null);
                 }
-                contentTxt.setText(null);
-                imageView.setImageBitmap(bitmap);
+                else {
+                    // Create and print bitmap on imageView
+                    btn.setEnabled(true);
+                    Buffer buffer2 = new Buffer();
+                    Lwxl lwxl = new Lwxl(buffer2);
+                    Bitmap bitmap = null;
+                    try {
+                        bitmap = createDoc(lwxl);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    contentTxt.setText(null);
+                    imageView.setImageBitmap(bitmap);
+
+                }
+            }
+            else{
+                contentTxt.setTextColor(getResources().getColor(R.color.red));
+                contentTxt.setText("Vous n'avez pas scanner de QR code, Reessayer à nouveau " +
+                        "ou saisissez les champs approprié manuellement");
 
             }
         }
@@ -209,40 +279,6 @@ public class DevoxxLabelPrinterActivity extends Activity {
                     "No scan data received!", Toast.LENGTH_SHORT);
             toast.show();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.initialise) {
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
-            return true;
-        }
-        if (id == R.id.load_data) {
-            Toast.makeText(getApplicationContext(),"Telechargement des données..." ,Toast.LENGTH_LONG).show();
-            new HttpAsyncTask().execute();
-            return true;
-        }
-        if (id == R.id.test_qrcode){
-            i = new Intent(this, TestQRcode.class);
-            startActivity(i);
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 
@@ -299,7 +335,7 @@ public class DevoxxLabelPrinterActivity extends Activity {
 
         if (guest != null){
             try {
-                Bitmap QRimage = encodeAsBitmap(guest.get("full_name")+"|"+guest.get("email")+"|"+guest.get("company"));
+                Bitmap QRimage = encodeAsBitmap(guest.get("full_name")+"::"+guest.get("email")+"::"+guest.get("company"));
                 canvas.drawBitmap(QRimage,640,0,null);
 
             } catch (WriterException e) {
@@ -705,11 +741,14 @@ public class DevoxxLabelPrinterActivity extends Activity {
                 contentTxt.setTextColor(getResources().getColor(R.color.red));
                 contentTxt.setText("Impossible d'imprimer l'étiquette, " +
                         "veuillez vous assurer que vous etes connecté à ICON-XXXXXX");
+                btn.setEnabled(true);
             }
             else{
                 contentTxt.setTextColor(getResources().getColor(R.color.lightgreen));
                 contentTxt.setText("félicitation ! L'impression s'est bien éfféctué.");
                 btn.setEnabled(false);
+                nameTxt.setText("");
+                companyTxt.setText("");
             }
         }
     }
@@ -760,5 +799,6 @@ public class DevoxxLabelPrinterActivity extends Activity {
             return false;
         }
     }
+
 
 }
